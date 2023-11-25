@@ -2,18 +2,28 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from index import BlockChain
 import json
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 app.secret_key = "alkdjfalkdjf"
+fake_product_analyzer = FakeProductAnalyzer()
+blockchain_manager = BlockchainManager()
 
 @app.route("/")
 def index():
-	if session.get("user"):
 		return render_template('index.html')
-	else:
-		flash("Please login to access MAVTAG")
-		return redirect(url_for('login'))
 
-
+@app.route("/home", methods=["GET", "POST"])
+def home():
+    if request.method == "POST":
+        session["user_type"] = request.form["user_type"]
+        
+        if user_type == "manufacturer" or user_type == "supplier":
+            return redirect(url_for('manufacturer_supplier_login'))
+        elif user_type == "customer":
+            return redirect(url_for('search_product'))
+    
+    session["user"] = ""
+    session["user_type"] = ""
+    return render_template('index.html')
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -26,25 +36,11 @@ def login():
 				session["user"] = "Admin"
 				return redirect(url_for("admin"))
 		
-		elif user == "Nike":
+		elif user == "manu":
 			if pswd == "password":
-				session["user"] = "Nike"
+				session["user"] = "manu"
 				return redirect(url_for("shoes"))
 		
-		elif user == "Musigny":
-			if pswd == "password":
-				session["user"] = "Musigny"
-				return redirect(url_for("wine"))
-		
-		elif user == "Lupin":
-			if pswd == "password":
-				session["user"] = "Lupin"
-				return redirect(url_for("medicine"))
-
-		elif user == "Kisan":
-			if pswd == "password":
-				session["user"] = "Kisan"
-				return redirect(url_for("fertilizer"))
 		else:
 			flash("Invalid Login details")
 			return redirect(url_for('login'))
@@ -52,9 +48,9 @@ def login():
 		return render_template('login.html')
 
 
-@app.route("/verify/<kid>", methods=["GET"])
-def verify(kid):
-		return render_template('verify.html', keyId=kid)
+@app.route("/verify/<product_id>", methods=["GET"])
+def verify(product_id):
+		return render_template('verify.html', keyId=product_id)
 
 
 @app.route("/verify", methods=["POST"])
@@ -101,27 +97,35 @@ def success():
 @app.route("/addproduct", methods=["POST", "GET"])
 def addproduct():
 	if request.method == "POST":
-		brand	 = request.form["brand"]
-		name	 = request.form["name"]
-		batch	 = request.form["batch"]
-		pid	 	 = request.form["id"]
-		manfdate = request.form["manfdate"]
-		exprydate= request.form["exprydate"]
-		price	 = request.form["price"]
-		size	 = request.form["size"]
-		ptype	 = request.form["type"]
-		
-		print(brand, name, batch, manfdate, exprydate, pid, price, size, ptype)
-		bc = BlockChain()
-		bc.addProduct(brand, name, batch, manfdate, exprydate, pid, price, size, ptype)
-		
-		flash("Product added successfully to the Blockchain")
-		# return render_template('home.html')
-		return redirect(url_for('home'))
+    session["product_details"] = {
+      "brand": request.form["brand"],
+		"name": request.form["name"],
+		"batch": request.form["batch"],
+		"pid": request.form["id"],
+		"manfdate": request.form["manfdate"],
+		"exprydate": request.form["exprydate"],
+		"price": request.form["price"],
+		"size": request.form["size"],
+		"ptype": request.form["type"],
+    }
+    
+		return redirect(url_for('confirm'))
 	else:
 		# return render_template('home.html')
 		return redirect(url_for('home'))
 
+@app.route("/confirm", methods=["GET", "POST"])
+def confirm():
+    product_details = session.get("product_details")
+    print(product_details)
+    if request.method == "POST":
+        if product_details:
+            blockchain_manager.add(product_details)
+            session.pop("product_details", None)  # Clear product_details from the session
+            return redirect(url_for('added'))
+    
+    return render_template('confirm.html', product_details=product_details)
+	
 
 @app.route("/admin")
 def admin():
@@ -130,6 +134,9 @@ def admin():
 	else:
 		return redirect(url_for('login'))
 
+@app.route("/added")
+def added():
+	return render_template('added.html')
 
 @app.route("/verifyNodes")
 def verifyNodes():
@@ -143,6 +150,35 @@ def verifyNodes():
 		flash("Blockchain Nodes are not valid")
 		return redirect(url_for('admin'))
 
+@app.route("/search_product", methods=["GET", "POST"])
+def search_product():
+    if request.method == "POST":
+        product_details = {
+            "brand": request.form["brand"],
+            "name": request.form["name"],
+             "price": request.form["price"],
+        }
+
+        # Analyze product with ML
+        is_fake = fake_product_analyzer.analyze_product(product_details)
+
+        # Verify product with blockchain
+        product_id = request.form["product_id"]  # Assuming there's a field for product ID
+        is_valid = blockchain_manager.verify_product(product_id)
+        
+        session["search_result"] = { "product_details": product_details, "is_fake_ml": is_fake_ml, "is_on_blockchain": is_on_blockchain }
+
+        return redirect(url_for('search_result'))
+
+    return render_template('search_product.html')
+
+@app.route("/search_result")
+def search_result():
+    if request.method == "POST":
+        search_result = session.pop("search_result", None)
+        return redirect(url_for('search_product'))
+    
+    return render_template('search_result.html', search_result=search_result)
 
 @app.route("/medicine")
 def medicine():
@@ -167,6 +203,7 @@ def wine():
 @app.route("/logout")
 def logout():
 	session["user"] = ""
+   session["user_type"] = ""
 	return redirect(url_for('login'))
 
 
