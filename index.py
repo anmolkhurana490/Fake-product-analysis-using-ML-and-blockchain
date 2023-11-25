@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from index import BlockChain
 import json
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.secret_key = "alkdjfalkdjf"
 
 @app.route("/")
