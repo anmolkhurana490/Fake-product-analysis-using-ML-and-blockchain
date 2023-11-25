@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "alkdjfalkdjf"
 
 @app.route("/")
-def home():
+def index():
 	if session.get("user"):
 		return render_template('index.html')
 	else:
