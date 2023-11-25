@@ -180,26 +180,6 @@ def search_result():
     
     return render_template('search_result.html', search_result=search_result)
 
-@app.route("/medicine")
-def medicine():
-	return render_template('MedicinePage.html')
-
-
-@app.route("/fertilizer")
-def fertilizer():
-	return render_template('FertilizersPage.html')
-
-
-@app.route("/shoes")
-def shoes():
-	return render_template('ShoesPage.html')
-
-
-@app.route("/wine")
-def wine():
-	return render_template('WinePage.html')
-
-
 @app.route("/logout")
 def logout():
 	session["user"] = ""
