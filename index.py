@@ -8,7 +8,7 @@ app.secret_key = "alkdjfalkdjf"
 @app.route("/")
 def index():
 	if session.get("user"):
-		return render_template('html/index.html')
+		return render_template('index.html')
 	else:
 		flash("Please login to access MAVTAG")
 		return redirect(url_for('login'))
