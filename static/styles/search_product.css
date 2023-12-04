@@ -26,7 +26,7 @@ body {
     font-weight: bold;
 }
 
-.add-product-form {
+.search-product-form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -56,5 +56,13 @@ input {
     padding: 5px;
     box-sizing: border-box;
     font-size: 16px;
-    color: black;
+}
+
+p {
+    margin: 10px 0px;
+}
+
+.error-message {
+    color: red;
+    margin-top: 15px;
 }
