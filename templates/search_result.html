@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Search Result</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='search_result.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/search_result.css') }}">
 </head>
 <body>
     <nav class="navbar">
@@ -20,12 +20,12 @@
                 <div class="product-details">
                     <h2>Product Details</h2>
                     <p><strong>Brand:</strong> {{ search_result.product_details.brand }}</p>
-                    <p><strong>Name:</strong> {{ search_result.product_details.productName }}</p>
+                    <p><strong>Name:</strong> {{ search_result.product_details.productname }}</p>
                     <p><strong>Exists:</strong> {{ search_result.product_details.exists }}</p>
                     <p><strong>Product Id:</strong> {{ search_result.product_details.productid }}</p>
                     <p><strong>Unique Id:</strong> {{ search_result.product_details.uniqueid }}</p>
-                    <p><strong>Retail Price:</strong> {{ search_result.product_details.retail_price }}</p>
-                    <p><strong>Discounted Price:</strong> {{ search_result.product_details.discounted_price }}</p>
+                    <p><strong>Retail Price:</strong> {{ search_result.product_details.retailprice }}</p>
+                    <p><strong>Discounted Price:</strong> {{ search_result.product_details.discountedprice }}</p>
                     <p><strong>Manufacturer:</strong> {{ search_result.product_details.manufacturer }}</p>
                     <p><strong>Timestamp:</strong> {{ search_result.product_details.timestamp }}</p>
                     <!-- Add more product details as needed -->
